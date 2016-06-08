@@ -1,64 +1,90 @@
 <template>
   <div id="app">
-    <img class="logo" src="./assets/logo.png">
-    <hello></hello>
-    <p>
-      Welcome to your Vue.js app!
-    </p>
-    <p>
-      To get a better understanding of how this boilerplate works, check out
-      <a href="http://vuejs-templates.github.io/webpack" target="_blank">its documentation</a>.
-      It is also recommended to go through the docs for
-      <a href="http://webpack.github.io/" target="_blank">Webpack</a> and
-      <a href="http://vuejs.github.io/vue-loader/" target="_blank">vue-loader</a>.
-      If you have any issues with the setup, please file an issue at this boilerplate's
-      <a href="https://github.com/vuejs-templates/webpack" target="_blank">repository</a>.
-    </p>
-    <p>
-      You may also want to checkout
-      <a href="https://github.com/vuejs/vue-router/" target="_blank">vue-router</a> for routing and
-      <a href="https://github.com/vuejs/vuex/" target="_blank">vuex</a> for state management.
-    </p>
+    <nav class="nav has-shadow">
+      <div class="nav-left">
+        <a class="nav-item is-tab" href="#" @click="switchTab('configure')">
+          配置
+        </a>
+        <a class="nav-item is-tab" href="#" @click="switchTab('sync')">
+          同步
+        </a>
+        <a class="nav-item is-tab" href="#" @click="switchTab('crontab')">
+          定时任务
+        </a>
+        <a class="nav-item is-tab" href="#" @click="switchTab('upgrade')">
+          升级
+        </a>
+      </div>
+
+      <div class="nav-center">
+        <a class="nav-item" href="#">
+          bdp-sync
+        </a>
+        <a class="nav-item" href="#">
+        </a>
+      </div>
+
+      <span class="nav-toggle">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+
+      <div class="nav-right nav-menu">
+
+        <span class="nav-item">
+          <a class="button is-danger">
+            <span>关闭服务</span>
+          </a>
+          <a class="button is-warning" href="#">
+            <span>注销</span>
+          </a>
+          <a class="button is-info" href="https://www.bdp.cn">
+            <span>官网</span>
+          </a>
+        </span>
+      </div>
+    </nav>
+    <login></login>
+    <configure v-ref:configure></configure>
+    <crontab v-ref:crontab></crontab>
+    <sync v-ref:sync></sync>
+    <upgrade v-ref:upgrade></upgrade>
   </div>
 </template>
 
 <script>
-import Hello from './components/Hello'
+  import login from './components/login.vue'
+  import configure from './components/configure.vue'
+  import crontab from './components/crontab.vue'
+  import sync from './components/sync.vue'
+  import upgrade from './components/upgrade.vue'
 
-export default {
-  components: {
-    Hello
+  export default {
+    data () {
+      return {
+        currentTab: 'configure'
+      }
+    },
+    components: {
+      login: login,
+      configure: configure,
+      crontab: crontab,
+      sync: sync,
+      upgrade: upgrade
+    },
+    methods: {
+      switchTab: function (tab) {
+        if (this.currentTab != null) {
+          this.$refs[this.currentTab].hidden()
+        }
+        this.$refs[tab].show()
+        this.currentTab = tab
+      }
+    }
   }
-}
 </script>
 
 <style>
-html {
-  height: 100%;
-}
-
-body {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-}
-
-#app {
-  color: #2c3e50;
-  margin-top: -100px;
-  max-width: 600px;
-  font-family: Source Sans Pro, Helvetica, sans-serif;
-  text-align: center;
-}
-
-#app a {
-  color: #42b983;
-  text-decoration: none;
-}
-
-.logo {
-  width: 100px;
-  height: 100px
-}
+  @import "assets/css/bulma.css";
 </style>
