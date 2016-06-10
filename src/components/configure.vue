@@ -3,81 +3,125 @@
     <div class="columns">
       <!--已添加数据库列表-->
       <div class="column is-one-third">
-        <table class="table">
-          <thead>
-            <tr>
-              <th>实例</th>
-              <th>类型</th>
-              <th>数据库</th>
-              <th><p class="center">操作</p></th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="database in databases">
-              <td>
-                <a>{{ database.server }}:{{ database.port }}</a>
-              </td>
-              <td>{{ database.type }}</td>
-              <td>{{ database.database }}</td>
-              <td>
-                <a class="button is-small" @click="dbConfigure($index)">配置</a>
-                <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-        <div class="center">
-          <a class="button is-info add" @click="addInstance('open')">
-            <span>添加实例</span>
-          </a>
-        </div>
-      </div>
-      <!--数据库配置详细页面-->
-      <div class="column">
-        <div class="columns tile">
-          <div class="column is-3">
-            <table class="table">
-              <thead>
+        <nav class="panel">
+          <p class="panel-heading">
+            已添加数据库
+            <a class="button right is-info" @click="saveAll">保存全部</a>
+          </p>
+          <div class="panel-block" v-for="database in databases">
+            <span class="tag">{{database.database}}</span>
+            <label class="tag">{{ database.uid }}@{{ database.server }}:{{ database.port }}</label>
+            <span class="tag is-success">{{ database.type }}</span>
+            <p class="control has-addons right center">
+              <a class="button is-small" @click="dbConfigure($index)">配置</a>
+              <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
+            </p>
+            <div v-if="database.editing">
+              <table class="table">
+                <thead>
                 <th>
                   <p>选择表</p>
                 </th>
-              </thead>
-              <tbody v-if="currentDatabase">
+                </thead>
+                <tbody>
                 <tr>
                   <td>
                     <p class="control has-addons">
                       <input class="input" type="text" placeholder="Find a repository">
-                      <a class="button is-info">
+                      <a class="button is-info center">
                         搜索
                       </a>
                     </p>
                   </td>
                 </tr>
-                <tr v-for="table in currentDatabase.append_table">
+                <tr v-for="table in database.append_table">
                   <td>
                     <p class="control">
-                      <label class="checkbox">
+                      <label class="checkbox tag is-info">
                         <input type="checkbox" checked @click="tableClicked($index, 'unchecked')">
-                          {{ table.name }}
+                        {{ table.name }}
                       </label>
                       <a class="button is-small right" @click="tableEdit($index)">编辑</a>
                     </p>
                   </td>
                 </tr>
-                <tr v-for="table in currentDatabase.tables">
+                <tr v-for="table in database.tables">
                   <td>
                     <p class="control">
-                      <label class="checkbox">
+                      <label class="checkbox tag">
                         <input type="checkbox" @click="tableClicked($index, 'checked')">
                         {{ table.name }}
                       </label>
                     </p>
                   </td>
                 </tr>
-              </tbody>
-            </table>
+                </tbody>
+              </table>
+            </div>
           </div>
-        </div>
+          <div class="panel-block">
+            <a class="button is-info add" @click="addInstance('open')">
+              <span>添加实例</span>
+            </a>
+          </div>
+        </nav>
+      </div>
+      <!--数据库配置详细页面-->
+      <div class="column">
+        <nav class="panel">
+          <p class="panel-heading">
+            表配置
+          </p>
+          <div class="panel-block" v-if="currentTable">
+            <p>预览及字段选择</p>
+            <table class="table is-bordered is-striped is-narrow">
+              <thead>
+                <th v-for="field in currentTable.fields">
+                  <label class="checkbox tag">
+                    <input type="checkbox" id="{{field.name}}" value="{{field.name}}" v-model="currentTable.select">
+                    {{ field.name }}
+                  </label>
+                  <em class="">{{ field.type }}</em>
+                </th>
+              </thead>
+            </table>
+            <p>{{ currentTable.select }}</p>
+          </div>
+        </nav>
+        <nav class="panel">
+          <p class="panel-heading">同步设置</p>
+          <div class="panel-block" v-if="currentTable">
+            <p class="control">
+              <span class="help is-info">增量条件</span>
+              <span class="select">
+                <select v-model="currentTable.index_field.name">
+                  <option value="">请选择增量字段</option>
+                  <option v-for="field in currentTable.fields">{{ field.name }}</option>
+                </select>
+              </span>
+              <span class="select">
+                <select v-model="currentTable.index_field.type">
+                  <option value="">请选增量方式</option>
+                  <option value="$value$">保存最大值自动递增</option>
+                  <option value=">">大于</option>
+                  <option value=">=">大于等于</option>
+                  <option value="=">等于</option>
+                  <option value="<">小于</option>
+                  <option value="<=">小于等于</option>
+                  <option value="like">相似</option>
+                  <option value="<>">不等于</option>
+                </select>
+              </span>
+            </p>
+            <p class="control">
+              <span class="help is-info">单次上传条数</span>
+              <span class="">
+                <input type="range" min="1000" max="50000" step="1000" v-model="currentTable.fetch_rows"/>
+                {{ currentTable.fetch_rows }}
+              </span>
+            </p>
+          </div>
+        </nav>
       </div>
     </div>
   </div>
@@ -169,15 +213,15 @@
         },
         newInstance: {
           server: {
-            value: '',
+            value: '127.0.0.1',
             help: ''
           },
           port: {
-            value: '',
+            value: '3306',
             help: ''
           },
           uid: {
-            value: '',
+            value: 'root',
             help: ''
           },
           pwd: {
@@ -189,7 +233,7 @@
             help: ''
           },
           type: {
-            value: '',
+            value: 'MYSQL',
             help: ''
           },
           databases: [],
@@ -197,16 +241,17 @@
         },
         databases: [
         ],
-        currentDatabase: null
+        currentDatabase: null,
+        currentTable: null
       }
     },
     ready: function () {
-      this.$http.get('/api/configure').then(
+      this.$http.get('/api/database').then(
         function (response) {
-          this.databases = []
-          for (var i = 0; i < response.data.db.length; i++) {
-            var database = response.data.db[i]
+          for (var i = 0; i < response.data.length; i++) {
+            var database = response.data[i]
             database.tables = []
+            database.editing = false
             this.databases.push(database)
           }
         },
@@ -224,12 +269,22 @@
       },
       dbConfigure: function (index) {
         this.currentDatabase = this.databases[index]
-        var tables = this.currentDatabase.tables
-        if (typeof (tables) === 'undefined') {
-          tables = []
-        }
-        if (tables.length <= 0) {
-          console.info(tables)
+        this.currentDatabase.editing = !this.currentDatabase.editing
+        if (!this.currentDatabase.hasOwnProperty('loaded')) {
+          var exists = []
+          for (var i in this.currentDatabase.append_table) {
+            exists.push(this.currentDatabase.append_table[i].name)
+          }
+          var data = {
+            exists: exists,
+            _id: this.currentDatabase._id
+          }
+          this.$http.post('/api/table/filter', data).then(function (response) {
+            this.currentDatabase.tables = response.data
+            this.currentDatabase.loaded = true
+          }, function (response) {
+            console.error(response.data)
+          })
         }
       },
       tableClicked: function (index, state) {
@@ -240,6 +295,25 @@
         } else if (state === 'unchecked') {
           table = this.currentDatabase.append_table.splice(index, 1)
           this.currentDatabase.tables = this.currentDatabase.tables.concat(table)
+        }
+      },
+      tableEdit: function (index) {
+        this.currentTable = this.currentDatabase.append_table[index]
+        if (!this.currentTable.hasOwnProperty('index_field')) {
+          this.currentTable.index_field = {name: ''}
+        }
+        if (!this.currentTable.hasOwnProperty('loaded')) {
+          var params = {
+            _id: this.currentDatabase._id,
+            name: this.currentTable.name
+          }
+          this.$http.get('/api/table/preview', params).then(function (response) {
+            this.currentTable.fields = response.data.fields
+            this.currentTable.data = response.data.data
+            this.currentTable.loaded = true
+          }, function (response) {
+            console.error(response.data)
+          })
         }
       },
       addInstance: function (action) {
@@ -261,21 +335,33 @@
                 pwd: this.newInstance.pwd.value,
                 type: this.newInstance.type.value,
                 database: this.newInstance.database.value,
-                append_table: [{name: 'sds'}],
-                tables: []
+                append_table: [],
+                tables: [],
+                editing: false
               }
 
-              this.databases.push(data)
-              this.classes.newInstance['is-active'] = false
+              this.$http.post('/api/database', data).then(function (response) {
+                this.databases.push(response.data)
+                this.classes.newInstance['is-active'] = false
+              }, function (response) {
+                console.error(response.data)
+              })
             }
           }
         }
       },
       removeDatabase: function (index) {
-        var removed = this.databases.splice(index, 1)[0]
-        if (removed === this.currentDatabase) {
-          this.currentDatabase = null
-        }
+        var removed = this.databases[index]
+        this.$http.delete('/api/database', removed).then(function (response) {
+          if (response.data === 'success') {
+            this.databases.splice(index, 1)
+            if (removed === this.currentDatabase) {
+              this.currentDatabase = null
+            }
+          }
+        }, function (resposnse) {
+          console.error(resposnse.data)
+        })
       },
       connection: function () {
         var data = {
@@ -294,6 +380,13 @@
         function (response) {
           window.alert(response.data)
         })
+      },
+      saveAll: function () {
+        this.$http.post('/api/save', JSON.stringify(this.databases)).then(function (response) {
+          console.info(response.data)
+        }, function (response) {
+          console.error(response.data)
+        })
       }
     }
   }
@@ -305,6 +398,7 @@
   }
   .right {
     float: right;
+    margin-top: 0px;
   }
   .add{
     width: 100%;
