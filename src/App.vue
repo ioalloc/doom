@@ -36,8 +36,8 @@
           <a class="button is-danger">
             <span>关闭服务</span>
           </a>
-          <a class="button is-warning" href="#">
-            <span>注销</span>
+          <a class="button is-warning" href="#" @click="userOptClicked">
+            <span>{{ userOpt }}</span>
           </a>
           <a class="button is-info" href="https://www.bdp.cn">
             <span>官网</span>
@@ -45,7 +45,7 @@
         </span>
       </div>
     </nav>
-    <login></login>
+    <model v-ref:model></model>
     <configure v-ref:configure></configure>
     <crontab v-ref:crontab></crontab>
     <sync v-ref:sync></sync>
@@ -55,9 +55,7 @@
     <div class="container">
       <div class="content has-text-centered">
         <p>
-          <strong>Bulma</strong> by <a href="http://jgthms.com">Jeremy Thomas</a>. The source code is licensed
-          <a href="http://opensource.org/licenses/mit-license.php">MIT</a>. The website content
-          is licensed <a href="http://creativecommons.org/licenses/by-nc-sa/4.0/">CC ANS 4.0</a>.
+          <strong>BDP数据同步客户端</strong> by <a href="https://www.bdp.cn">商业数据平台</a>
         </p>
       </div>
     </div>
@@ -65,7 +63,7 @@
 </template>
 
 <script>
-  import login from './components/login.vue'
+  import model from './components/model.vue'
   import configure from './components/configure.vue'
   import crontab from './components/crontab.vue'
   import sync from './components/sync.vue'
@@ -74,23 +72,33 @@
   export default {
     data () {
       return {
-        currentTab: 'configure'
+        currentTab: 'configure',
+        userOpt: '登录'
       }
     },
     components: {
-      login: login,
+      model: model,
       configure: configure,
       crontab: crontab,
       sync: sync,
       upgrade: upgrade
     },
+    ready: function () {
+      this.$refs['configure'].loadConfigure('ready')
+    },
     methods: {
+      initConfigure: function () {
+        this.$refs['configure'].loadConfigure('init')
+      },
       switchTab: function (tab) {
         if (this.currentTab != null) {
           this.$refs[this.currentTab].hidden()
         }
         this.$refs[tab].show()
         this.currentTab = tab
+      },
+      userOptClicked: function () {
+        this.$refs['model'].show(this.userOpt)
       }
     }
   }
@@ -98,4 +106,10 @@
 
 <style>
   @import "assets/css/bulma.css";
+  .checkbox input {
+    margin-right: 5px;
+  }
+  em {
+    margin: auto;
+  }
 </style>

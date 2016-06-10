@@ -246,19 +246,6 @@
       }
     },
     ready: function () {
-      this.$http.get('/api/database').then(
-        function (response) {
-          for (var i = 0; i < response.data.length; i++) {
-            var database = response.data[i]
-            database.tables = []
-            database.editing = false
-            this.databases.push(database)
-          }
-        },
-        function (response) {
-          console.error(response.data)
-        }
-      )
     },
     methods: {
       show: function () {
@@ -266,6 +253,24 @@
       },
       hidden: function () {
         this.classes.template['is-hidden'] = true
+      },
+      loadConfigure: function (from) {
+        this.$http.get('/api/database').then(
+          function (response) {
+            for (var i = 0; i < response.data.length; i++) {
+              var database = response.data[i]
+              database.tables = []
+              database.editing = false
+              this.databases.push(database)
+            }
+            this.$parent.userOpt = '注销'
+          },
+          function (response) {
+            if (from === 'init') {
+              window.alert(response.data)
+            }
+          }
+        )
       },
       dbConfigure: function (index) {
         this.currentDatabase = this.databases[index]
@@ -283,7 +288,7 @@
             this.currentDatabase.tables = response.data
             this.currentDatabase.loaded = true
           }, function (response) {
-            console.error(response.data)
+            window.alert(response.data)
           })
         }
       },
@@ -312,7 +317,7 @@
             this.currentTable.data = response.data.data
             this.currentTable.loaded = true
           }, function (response) {
-            console.error(response.data)
+            window.alert(response.data)
           })
         }
       },
@@ -344,7 +349,7 @@
                 this.databases.push(response.data)
                 this.classes.newInstance['is-active'] = false
               }, function (response) {
-                console.error(response.data)
+                window.alert(response.data)
               })
             }
           }
@@ -359,8 +364,8 @@
               this.currentDatabase = null
             }
           }
-        }, function (resposnse) {
-          console.error(resposnse.data)
+        }, function (response) {
+          window.alert(response.data)
         })
       },
       connection: function () {
@@ -385,7 +390,7 @@
         this.$http.post('/api/save', JSON.stringify(this.databases)).then(function (response) {
           console.info(response.data)
         }, function (response) {
-          console.error(response.data)
+          window.alert(response.data)
         })
       }
     }
