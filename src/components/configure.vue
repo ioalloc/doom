@@ -9,25 +9,29 @@
             <a class="button right is-info" @click="saveAll">保存全部</a>
           </p>
           <div class="panel-block" v-for="database in databases">
-            <span class="tag">{{database.database}}</span>
             <label class="tag">{{ database.uid }}@{{ database.server }}:{{ database.port }}</label>
+            <span class="tag">{{database.database}}</span>
             <span class="tag is-success">{{ database.type }}</span>
             <p class="control has-addons right center">
               <a class="button is-small" @click="dbConfigure($index)">配置</a>
               <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
             </p>
-            <div v-if="database.editing">
+            <div v-if="database.editing" class="table-view">
               <table class="table">
-                <thead>
-                <th>
-                  <p>选择表</p>
-                </th>
-                </thead>
+                <!--<thead>-->
+                <!--<th>-->
+                  <!--<p>选择表</p>-->
+                <!--</th>-->
+                <!--</thead>-->
                 <tbody>
                 <tr>
                   <td>
+                    <p class="control">
+                      <span class="tag">数据源名称</span>
+                      <input class="input" placeholder="数据源名称(可选)" v-model="database.ds_name">
+                    </p>
                     <p class="control has-addons">
-                      <input class="input" type="text" placeholder="Find a repository">
+                      <input class="input" type="text" placeholder="搜索表">
                       <a class="button is-info center">
                         搜索
                       </a>
@@ -342,6 +346,7 @@
                 database: this.newInstance.database.value,
                 append_table: [],
                 tables: [],
+                ds_name: '',
                 editing: false
               }
 
@@ -408,5 +413,11 @@
   .add{
     width: 100%;
     margin-top: 0;
+  }
+  .table-view {
+    height: 600px;
+    overflow-y: scroll;
+    margin: 2px 0 10px 0;
+    float: right;
   }
 </style>
