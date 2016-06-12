@@ -76,6 +76,7 @@
           for (var i in response.data) {
             this.logs.push(response.data[i])
             if (response.data[i] === 'task finished') {
+              clearTimeout(this.timer)
               isFinished = true
             }
             console.info(response.data[i] + ' ' + isFinished)

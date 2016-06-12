@@ -68,7 +68,10 @@
             表配置
           </p>
           <div class="panel-block" v-if="currentTable">
-            <p>预览及字段选择</p>
+            <p class="heading">预览及字段选择</p>
+            <p class="control">
+              <a class="button is-primary" @click="selectAll">全选</a>
+            </p>
             <table class="table is-bordered is-striped is-narrow">
               <thead>
                 <th v-for="field in currentTable.fields">
@@ -80,7 +83,6 @@
                 </th>
               </thead>
             </table>
-            <p>{{ currentTable.select }}</p>
           </div>
         </nav>
         <nav class="panel">
@@ -193,8 +195,8 @@
 
       </section>
       <footer class="modal-card-foot">
-        <a class="button is-primary" @click="connection">测试连接</a>
-        <a class="button is-primary right" @click="addInstance('confirm')">确认</a>
+        <a class="button is-primary" @click="connection" :class="classes.newInstanceConnect">测试连接</a>
+        <a class="button is-primary right" @click="addInstance('confirm')" :class="classes.newInstanceConfirm">确认</a>
         <a class="button" @click="addInstance('cancel')">取消</a>
       </footer>
     </div>
@@ -211,6 +213,12 @@
           },
           newInstance: {
             'is-active': false
+          },
+          newInstanceConnect: {
+            'is-loading': false
+          },
+          newInstanceConfirm: {
+            'is-loading': false
           }
         },
         newInstance: {
@@ -338,6 +346,8 @@
           })
         }
       },
+      selectAll: function () {
+      },
       addInstance: function (action) {
         switch (action) {
           case 'open': {
@@ -364,13 +374,19 @@
                 search: '',
                 editing: false
               }
-
-              this.$http.post('/api/database', data).then(function (response) {
-                this.databases.push(response.data)
-                this.classes.newInstance['is-active'] = false
-              }, function (response) {
-                window.alert(response.data)
-              })
+              if (data.database === '') {
+                window.alert('请选择数据库')
+              } else {
+                this.classes.newInstanceConfirm['is-loading'] = true
+                this.$http.post('/api/database', data).then(function (response) {
+                  this.databases.push(response.data)
+                  this.classes.newInstance['is-active'] = false
+                  this.classes.newInstanceConfirm['is-loading'] = false
+                }, function (response) {
+                  window.alert(response.data)
+                  this.classes.newInstanceConfirm['is-loading'] = false
+                })
+              }
             }
           }
         }
@@ -395,15 +411,19 @@
           uid: this.newInstance.uid.value,
           pwd: this.newInstance.pwd.value,
           type: this.newInstance.type.value,
-          database: this.newInstance.database.value
+          database: this.newInstance.database.value,
+          sid: this.newInstance.sid.value
         }
         this.newInstance.connected = false
+        this.classes.newInstanceConnect['is-loading'] = true
         this.$http.post('/api/connect', data).then(function (response) {
           this.newInstance.databases = response.data
           this.newInstance.connected = true
+          this.classes.newInstanceConnect['is-loading'] = false
         },
         function (response) {
           window.alert(response.data)
+          this.classes.newInstanceConnect['is-loading'] = false
         })
       },
       saveAll: function () {
@@ -418,6 +438,7 @@
 </script>
 
 <style>
+  @import "../assets/css/bulma.css";
   .center{
     text-align: center;
   }

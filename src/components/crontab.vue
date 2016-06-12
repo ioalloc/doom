@@ -16,8 +16,8 @@
               <p class="control">
                 <input class="input is-primary" type="text" v-model="minute">
               </p>
-              <label class="label">任务名</label>
-              <p class="control">
+              <label class="label" v-if="windows">任务名</label>
+              <p class="control" v-if="windows">
                 <input class="input is-primary" type="text" v-model="taskName">
               </p>
               <a class="button is-primary" @click="createTask">创建</a>
@@ -92,7 +92,7 @@
         this.templateClass['is-hidden'] = true
       },
       createTask: function () {
-        this.$http.post('/api/crontab', {hour: this.hour, minute: this.minute}).then(function (response) {
+        this.$http.post('/api/crontab', {hour: this.hour, minute: this.minute, taskName: this.taskName}).then(function (response) {
           window.alert('创建成功')
         }, function (response) {
           window.alert(response.data)
