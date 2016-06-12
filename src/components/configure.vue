@@ -10,7 +10,7 @@
           </p>
           <div class="panel-block" v-for="database in databases">
             <label class="tag">{{ database.uid }}@{{ database.server }}:{{ database.port }}</label>
-            <span class="tag">{{database.database}}</span>
+            <span class="tag">{{ database.database }}</span>
             <span class="tag is-success">{{ database.type }}</span>
             <p class="control has-addons right center">
               <a class="button is-small" @click="dbConfigure($index)">配置</a>
@@ -18,27 +18,18 @@
             </p>
             <div v-if="database.editing" class="table-view">
               <table class="table">
-                <!--<thead>-->
-                <!--<th>-->
-                  <!--<p>选择表</p>-->
-                <!--</th>-->
-                <!--</thead>-->
                 <tbody>
                 <tr>
                   <td>
                     <p class="control">
-                      <span class="tag">数据源名称</span>
                       <input class="input" placeholder="数据源名称(可选)" v-model="database.ds_name">
                     </p>
-                    <p class="control has-addons">
-                      <input class="input" type="text" placeholder="搜索表">
-                      <a class="button is-info center">
-                        搜索
-                      </a>
+                    <p class="control">
+                      <input class="input" type="text" placeholder="搜索表" v-model="database.search">
                     </p>
                   </td>
                 </tr>
-                <tr v-for="table in database.append_table">
+                <tr v-for="table in database.append_table | filterBy database.search">
                   <td>
                     <p class="control">
                       <label class="checkbox tag is-info">
@@ -49,7 +40,7 @@
                     </p>
                   </td>
                 </tr>
-                <tr v-for="table in database.tables">
+                <tr v-for="table in database.tables | filterBy database.search">
                   <td>
                     <p class="control">
                       <label class="checkbox tag">
@@ -151,21 +142,28 @@
         <p class="control has-icon has-icon-right">
           <input class="input is-success" type="text" v-model="newInstance.port.value">
           <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.server.help}}</span>
+          <span class="help is-success">{{newInstance.port.help}}</span>
         </p>
 
         <label class="label">用户名</label>
         <p class="control has-icon has-icon-right">
           <input class="input is-success" type="text" v-model="newInstance.uid.value">
           <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.server.help}}</span>
+          <span class="help is-success">{{newInstance.uid.help}}</span>
         </p>
 
         <label class="label">密码</label>
         <p class="control has-icon has-icon-right">
-          <input class="input is-success" type="text" v-model="newInstance.pwd.value">
+          <input class="input is-success" type="password" v-model="newInstance.pwd.value">
           <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.server.help}}</span>
+          <span class="help is-success">{{newInstance.pwd.help}}</span>
+        </p>
+
+        <label class="label" v-if="isOracle">SID</label>
+        <p class="control has-icon has-icon-right" v-if="isOracle">
+          <input class="input is-success" type="text" v-model="newInstance.sid.value">
+          <i class="fa fa-check"></i>
+          <span class="help is-success">{{newInstance.sid.help}}</span>
         </p>
 
         <label class="label">类型</label>
@@ -240,6 +238,9 @@
             value: 'MYSQL',
             help: ''
           },
+          sid: {
+            value: ''
+          },
           databases: [],
           connected: false
         },
@@ -247,6 +248,12 @@
         ],
         currentDatabase: null,
         currentTable: null
+      }
+    },
+    computed: {
+      isOracle: function () {
+        console.info(this.newInstance.type.value)
+        return this.newInstance.type.value === 'ORACLE'
       }
     },
     ready: function () {
@@ -265,6 +272,7 @@
               var database = response.data[i]
               database.tables = []
               database.editing = false
+              database.search = ''
               this.databases.push(database)
             }
             this.$parent.userOpt = '注销'
@@ -272,6 +280,11 @@
           function (response) {
             if (from === 'init') {
               window.alert(response.data)
+            } else {
+              if (response.status === 401) {
+                this.$parent.isLogin = false
+                this.$parent.showLogin()
+              }
             }
           }
         )
@@ -344,9 +357,11 @@
                 pwd: this.newInstance.pwd.value,
                 type: this.newInstance.type.value,
                 database: this.newInstance.database.value,
+                sid: this.newInstance.sid.value,
                 append_table: [],
                 tables: [],
                 ds_name: '',
+                search: '',
                 editing: false
               }
 
@@ -393,7 +408,7 @@
       },
       saveAll: function () {
         this.$http.post('/api/save', JSON.stringify(this.databases)).then(function (response) {
-          console.info(response.data)
+          window.alert('保存成功')
         }, function (response) {
           window.alert(response.data)
         })
@@ -418,6 +433,6 @@
     height: 600px;
     overflow-y: scroll;
     margin: 2px 0 10px 0;
-    float: right;
+    /*float: right;*/
   }
 </style>

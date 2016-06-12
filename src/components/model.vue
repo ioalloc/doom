@@ -35,7 +35,7 @@
       </section>
       <footer class="modal-card-foot">
         <a href="/api/logout" class="button is-warning">确认</a>
-        <a class="button is-info">取消</a>
+        <a class="button is-info" @click="close">取消</a>
       </footer>
     </div>
   </div>
@@ -75,6 +75,10 @@
             break
           }
         }
+      },
+      close: function () {
+        this.loginState = ''
+        this.logoutState = ''
       },
       showLogin: function () {
         this.loginState = 'is-active'

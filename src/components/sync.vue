@@ -10,9 +10,16 @@
             <a class="button is-danger" @click="stop">停止</a>
             <a class="button is-warning" @click="clear">清空</a>
           </p>
-          <div class="log" id="log">
-            <li v-for="log in logs" track-by="$index">{{ log }}</li>
-          </div>
+          <article class="message is-primary">
+            <div class="message-header">
+              同步日志
+            </div>
+            <div class="message-body">
+              <div class="log" id="log">
+                <li v-for="log in logs" track-by="$index">{{ log }}</li>
+              </div>
+            </div>
+          </article>
         </div>
       </div>
     </div>
@@ -71,6 +78,7 @@
             if (response.data[i] === 'task finished') {
               isFinished = true
             }
+            console.info(response.data[i] + ' ' + isFinished)
           }
         })
         var log = document.getElementById('log')

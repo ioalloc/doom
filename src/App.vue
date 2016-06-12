@@ -73,7 +73,8 @@
     data () {
       return {
         currentTab: 'configure',
-        userOpt: '登录'
+        userOpt: '登录',
+        isLogin: true
       }
     },
     components: {
@@ -96,6 +97,9 @@
         }
         this.$refs[tab].show()
         this.currentTab = tab
+      },
+      showLogin: function () {
+        this.$refs['model'].show('登录')
       },
       userOptClicked: function () {
         this.$refs['model'].show(this.userOpt)
