@@ -33,7 +33,7 @@
       <div class="nav-right nav-menu">
 
         <span class="nav-item">
-          <a class="button is-danger">
+          <a class="button is-danger" @click="shutdown">
             <span>关闭服务</span>
           </a>
           <a class="button is-warning" href="#" @click="userOptClicked">
@@ -103,6 +103,11 @@
       },
       userOptClicked: function () {
         this.$refs['model'].show(this.userOpt)
+      },
+      shutdown: function () {
+        this.$http.get('/api/shutdown').then(function () {
+          window.alert('已关闭')
+        })
       }
     }
   }
