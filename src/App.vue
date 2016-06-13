@@ -2,16 +2,16 @@
   <div id="app">
     <nav class="nav has-shadow">
       <div class="nav-left">
-        <a class="nav-item is-tab" href="#" @click="switchTab('configure')">
+        <a class="nav-item is-tab" :class="tabs.configure.class" @click="switchTab('configure')">
           配置
         </a>
-        <a class="nav-item is-tab" href="#" @click="switchTab('sync')">
+        <a class="nav-item is-tab" :class="tabs.sync.class" @click="switchTab('sync')">
           同步
         </a>
-        <a class="nav-item is-tab" href="#" @click="switchTab('crontab')">
+        <a class="nav-item is-tab" :class="tabs.crontab.class" @click="switchTab('crontab')">
           定时任务
         </a>
-        <a class="nav-item is-tab" href="#" @click="switchTab('upgrade')">
+        <a class="nav-item is-tab" :class="tabs.upgrade.class" @click="switchTab('upgrade')">
           升级
         </a>
       </div>
@@ -72,9 +72,37 @@
   export default {
     data () {
       return {
-        currentTab: 'configure',
         userOpt: '登录',
-        isLogin: true
+        isLogin: true,
+        classes: {
+        },
+        tabs: {
+          configure: {
+            name: 'configure',
+            class: {
+              'is-active': true
+            }
+          },
+          sync: {
+            name: 'sync',
+            class: {
+              'is-active': false
+            }
+          },
+          crontab: {
+            name: 'crontab',
+            class: {
+              'is-active': false
+            }
+          },
+          upgrade: {
+            name: 'upgrade',
+            class: {
+              'is-active': false
+            }
+          }
+        },
+        currentTab: null
       }
     },
     components: {
@@ -86,6 +114,7 @@
     },
     ready: function () {
       this.$refs['configure'].loadConfigure('ready')
+      this.currentTab = this.tabs.configure
     },
     methods: {
       initConfigure: function () {
@@ -93,10 +122,12 @@
       },
       switchTab: function (tab) {
         if (this.currentTab != null) {
-          this.$refs[this.currentTab].hidden()
+          this.$refs[this.currentTab.name].hidden()
+          this.currentTab.class['is-active'] = false
         }
         this.$refs[tab].show()
-        this.currentTab = tab
+        this.currentTab = this.tabs[tab]
+        this.currentTab.class['is-active'] = true
       },
       showLogin: function () {
         this.$refs['model'].show('登录')

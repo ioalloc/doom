@@ -45,7 +45,8 @@
         },
         classes: {
           upgradeButton: {
-            'is-loading': false
+            'is-loading': false,
+            'is-disabled': false
           }
         },
         changeLog: '已是最新版本',
@@ -90,6 +91,7 @@
               isFinished = true
               clearTimeout(this.timer)
               this.classes.upgradeButton['is-loading'] = false
+              this.classes.upgradeButton['is-disabled'] = true
               this.button = '重启后生效'
             } else if (stat.status === 'downloading') {
               this.downloaded = stat.received

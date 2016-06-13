@@ -88,7 +88,7 @@
         <nav class="panel">
           <p class="panel-heading">同步设置</p>
           <div class="panel-block" v-if="currentTable">
-            <p class="control">
+            <p class="control has-addons">
               <span class="help is-info">增量条件</span>
               <span class="select">
                 <select v-model="currentTable.index_field.name">
@@ -109,7 +109,20 @@
                   <option value="<>">不等于</option>
                 </select>
               </span>
+              <span>
+                <input type="text" class="input" placeholder="值(最大值自增不需要填)" v-model="currentTable.index_field.value">
+              </span>
             </p>
+            <!--<p class="control">-->
+              <!--<span class="help is-info">当前主键</span>-->
+              <!--<span class="select">-->
+                <!--<select v-model="currentTable.keys" aria-multiselectable="true">-->
+                  <!--<option >sdf</option>-->
+                  <!--<option >sdf</option>-->
+                  <!--<option >sdf</option>-->
+                <!--</select>-->
+              <!--</span>-->
+            <!--</p>-->
             <p class="control">
               <span class="help is-info">单次上传条数</span>
               <span class="">
@@ -341,12 +354,21 @@
             this.currentTable.fields = response.data.fields
             this.currentTable.data = response.data.data
             this.currentTable.loaded = true
+            this.currentTable.keys = []
+            for (var i in response.data.fields) {
+              if (response.data.fields[i].key) {
+                this.currentTable.keys.push(response.data.fields[i].name)
+              }
+            }
           }, function (response) {
             window.alert(response.data)
           })
         }
       },
       selectAll: function () {
+        for (var i in this.currentTable.fields) {
+          this.currentTable.select.push(this.currentTable.fields[i].name)
+        }
       },
       addInstance: function (action) {
         switch (action) {
