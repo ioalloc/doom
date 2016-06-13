@@ -146,40 +146,59 @@
       </header>
       <section class="modal-card-body">
         <!-- Content ... -->
-        <label class="label">服务器地址</label>
-        <p class="control">
-          <input class="input is-success" type="text" placeholder="" v-model="newInstance.server.value">
-          <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.server.help}}</span>
-        </p>
+        <div v-if="visible.server">
+          <label class="label">服务器地址</label>
+          <p class="control">
+            <input class="input is-success" type="text" placeholder="" v-model="newInstance.server.value">
+            <i class="fa fa-check"></i>
+            <span class="help is-success">{{newInstance.server.help}}</span>
+          </p>
+        </div>
 
-        <label class="label">服务器端口</label>
-        <p class="control has-icon has-icon-right">
-          <input class="input is-success" type="text" v-model="newInstance.port.value">
-          <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.port.help}}</span>
-        </p>
+        <div v-if="visible.port">
+          <label class="label">服务器端口</label>
+          <p class="control has-icon has-icon-right">
+            <input class="input is-success" type="text" v-model="newInstance.port.value">
+            <i class="fa fa-check"></i>
+            <span class="help is-success">{{newInstance.port.help}}</span>
+          </p>
+        </div>
 
-        <label class="label">用户名</label>
-        <p class="control has-icon has-icon-right">
-          <input class="input is-success" type="text" v-model="newInstance.uid.value">
-          <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.uid.help}}</span>
-        </p>
+        <div v-if="visible.uid">
+          <label class="label">用户名</label>
+          <p class="control has-icon has-icon-right">
+            <input class="input is-success" type="text" v-model="newInstance.uid.value">
+            <i class="fa fa-check"></i>
+            <span class="help is-success">{{newInstance.uid.help}}</span>
+          </p>
+        </div>
 
-        <label class="label">密码</label>
-        <p class="control has-icon has-icon-right">
-          <input class="input is-success" type="password" v-model="newInstance.pwd.value">
-          <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.pwd.help}}</span>
-        </p>
+        <div v-if="visible.pwd">
+          <label class="label">密码</label>
+          <p class="control has-icon has-icon-right">
+            <input class="input is-success" type="password" v-model="newInstance.pwd.value">
+            <i class="fa fa-check"></i>
+            <span class="help is-success">{{newInstance.pwd.help}}</span>
+          </p>
+        </div>
 
-        <label class="label" v-if="isOracle">SID</label>
-        <p class="control has-icon has-icon-right" v-if="isOracle">
-          <input class="input is-success" type="text" v-model="newInstance.sid.value">
-          <i class="fa fa-check"></i>
-          <span class="help is-success">{{newInstance.sid.help}}</span>
-        </p>
+        <div v-if="visible.sid">
+          <label class="label">SID</label>
+          <p class="control has-icon has-icon-right">
+            <input class="input is-success" type="text" v-model="newInstance.sid.value">
+            <i class="fa fa-check"></i>
+            <span class="help is-success">{{newInstance.sid.help}}</span>
+          </p>
+        </div>
+
+        <div v-if="visible.odbc">
+          <label class="label">数据源名称(仅限Windows 32)</label>
+          <p class="control has-icon has-icon-right">
+            <input class="input is-success" type="text" v-model="newInstance.server.value">
+            <i class="fa fa-check"></i>
+            <span class="help is-success">{{newInstance.server.help}}</span>
+          </p>
+        </div>
 
         <label class="label">类型</label>
         <p class="control">
@@ -202,17 +221,24 @@
         </p>
 
         <label class="label">数据库名</label>
-        <p class="control has-icon has-icon-right">
-          <span class="select">
-            <select v-model="newInstance.database.value">
-              <option v-for="database in newInstance.databases">{{database}}</option>
-            </select>
-          </span>
-        </p>
+        <div class="level">
+          <p class="control has-icon has-icon-right level-left">
+            <div class="level-item">
+              <span class="select">
+                <select v-model="newInstance.database.value">
+                  <option v-for="database in newInstance.databases">{{database}}</option>
+                </select>
+              </span>
+            </div>
+            <div class="level-item">
+              <label class="is-info is-success">{{ newInstance.successTip }}</label>
+            </div>
+          </p>
+        </div>
 
       </section>
       <footer class="modal-card-foot">
-        <a class="button is-primary" @click="connection" :class="classes.newInstanceConnect">测试连接</a>
+        <a class="button is-primary" @click="connection" :class="[connectButtonClass,classes.newInstanceConnect]">测试连接</a>
         <a class="button is-primary right" @click="addInstance('confirm')" :class="classes.newInstanceConfirm">确认</a>
         <a class="button" @click="addInstance('cancel')">取消</a>
       </footer>
@@ -267,7 +293,8 @@
             value: ''
           },
           databases: [],
-          connected: false
+          connected: false,
+          successTip: ''
         },
         databases: [
         ],
@@ -276,9 +303,40 @@
       }
     },
     computed: {
-      isOracle: function () {
-        console.info(this.newInstance.type.value)
-        return this.newInstance.type.value === 'ORACLE'
+      connectButtonClass: function () {
+        var disabled = false
+        if (!(this.newInstance.server.value && this.newInstance.type.value)) {
+          disabled = true
+        }
+        return {
+          'is-disabled': disabled
+        }
+      },
+      visible: function () {
+        var server = false
+        var port = false
+        var uid = false
+        var pwd = false
+        var sid = false
+        var odbc = false
+        var input = this.newInstance
+
+        if (input.type.value === 'ODBC') {
+          odbc = true
+        } else if (input.type.value === 'ORACLE') {
+          server = port = uid = pwd = sid = true
+        } else {
+          server = port = uid = pwd = true
+        }
+
+        return {
+          server: server,
+          port: port,
+          uid: uid,
+          pwd: pwd,
+          sid: sid,
+          odbc: odbc
+        }
       }
     },
     ready: function () {
@@ -446,6 +504,7 @@
           this.newInstance.databases = response.data
           this.newInstance.connected = true
           this.classes.newInstanceConnect['is-loading'] = false
+          this.newInstance.successTip = '连接成功, 请选择表'
         },
         function (response) {
           window.alert(response.data)
