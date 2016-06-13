@@ -195,6 +195,10 @@
             <input type="radio" name="question" value="ORACLE" v-model="newInstance.type.value">
             ORACLE
           </label>
+          <label class="radio">
+            <input type="radio" name="question" value="ODBC" v-model="newInstance.type.value">
+            ODBC
+          </label>
         </p>
 
         <label class="label">数据库名</label>
@@ -236,15 +240,15 @@
         },
         newInstance: {
           server: {
-            value: '127.0.0.1',
+            value: '',
             help: ''
           },
           port: {
-            value: '3306',
+            value: '',
             help: ''
           },
           uid: {
-            value: 'root',
+            value: '',
             help: ''
           },
           pwd: {
@@ -256,7 +260,7 @@
             help: ''
           },
           type: {
-            value: 'MYSQL',
+            value: '',
             help: ''
           },
           sid: {
