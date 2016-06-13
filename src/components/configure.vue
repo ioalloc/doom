@@ -2,62 +2,53 @@
   <div :class="classes.template">
     <div class="columns">
       <!--已添加数据库列表-->
-      <div class="column is-one-third">
+      <div class="column is-one-third database">
         <nav class="panel">
-          <p class="panel-heading">
+          <p class="panel-heading has-addons">
             已添加数据库
+            <a class="button right is-outlined is-success" @click="addInstance('open')">添加实例</a>
             <a class="button right is-info" @click="saveAll">保存全部</a>
+            <p class="control">
+              <input class="input" type="text" placeholder="搜索表" v-model="tableSearch">
+            </p>
           </p>
           <div class="panel-block" v-for="database in databases">
-            <label class="tag">{{ database.uid }}@{{ database.server }}:{{ database.port }}</label>
-            <span class="tag">{{ database.database }}</span>
-            <span class="tag is-success">{{ database.type }}</span>
-            <p class="control has-addons right center">
-              <a class="button is-small" @click="dbConfigure($index)">配置</a>
-              <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
-            </p>
-            <div v-if="database.editing" class="table-view">
-              <table class="table">
-                <tbody>
-                <tr>
-                  <td>
-                    <p class="control">
+            <div  class="">
+              <ul class="">
+                <li>
+                  <label class="tag">{{ database.uid }}@{{ database.server }}:{{ database.port }}</label>
+                  <span class="tag">{{ database.database }}</span>
+                  <span class="tag is-success">{{ database.type }}</span>
+                  <p class="control has-addons right center">
+                    <a class="button is-small" @click="dbConfigure($index)">配置</a>
+                    <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
+                  </p>
+                  <ul v-if="database.editing" class="tree">
+                    <li class="tree-input">
                       <input class="input" placeholder="数据源名称(可选)" v-model="database.ds_name">
-                    </p>
-                    <p class="control">
-                      <input class="input" type="text" placeholder="搜索表" v-model="database.search">
-                    </p>
-                  </td>
-                </tr>
-                <tr v-for="table in database.append_table | filterBy database.search">
-                  <td>
-                    <p class="control">
-                      <label class="checkbox tag is-info">
-                        <input type="checkbox" checked @click="tableClicked($index, 'unchecked')">
-                        {{ table.name }}
-                      </label>
+                    </li>
+                    <li v-for="table in database.append_table | filterBy tableSearch">
+                      <p class="control tag is-info">
+                        <label>
+                          <input type="checkbox" checked @click="tableClicked($index, 'unchecked')">
+                          {{ table.name }}
+                        </label>
+                      </p>
                       <a class="button is-small right" @click="tableEdit($index)">编辑</a>
-                    </p>
-                  </td>
-                </tr>
-                <tr v-for="table in database.tables | filterBy database.search">
-                  <td>
-                    <p class="control">
-                      <label class="checkbox tag">
-                        <input type="checkbox" @click="tableClicked($index, 'checked')">
-                        {{ table.name }}
-                      </label>
-                    </p>
-                  </td>
-                </tr>
-                </tbody>
-              </table>
+                    </li>
+                    <li v-for="table in database.tables | filterBy tableSearch">
+                      <p class="control tag">
+                        <label>
+                          <input type="checkbox" @click="tableClicked($index, 'checked')">
+                          {{ table.name }}
+                        </label>
+                      </p>
+                      <a class="button is-small right is-hidden">编辑</a>
+                    </li>
+                  </ul>
+                </li>
+              </ul>
             </div>
-          </div>
-          <div class="panel-block">
-            <a class="button is-info add" @click="addInstance('open')">
-              <span>添加实例</span>
-            </a>
           </div>
         </nav>
       </div>
@@ -149,7 +140,7 @@
         <div v-if="visible.server">
           <label class="label">服务器地址</label>
           <p class="control">
-            <input class="input is-success" type="text" placeholder="" v-model="newInstance.server.value">
+            <input class="input is-success" type="text" placeholder="必填" v-model="newInstance.server.value">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.server.help}}</span>
           </p>
@@ -158,7 +149,7 @@
         <div v-if="visible.port">
           <label class="label">服务器端口</label>
           <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="text" v-model="newInstance.port.value">
+            <input class="input is-success" type="text" v-model="newInstance.port.value" placeholder="必填">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.port.help}}</span>
           </p>
@@ -194,7 +185,7 @@
         <div v-if="visible.odbc">
           <label class="label">数据源名称(仅限Windows 32)</label>
           <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="text" v-model="newInstance.server.value">
+            <input class="input is-success" type="text" v-model="newInstance.server.value" placeholder="必填">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.server.help}}</span>
           </p>
@@ -286,7 +277,7 @@
             help: ''
           },
           type: {
-            value: '',
+            value: 'MYSQL',
             help: ''
           },
           sid: {
@@ -299,13 +290,16 @@
         databases: [
         ],
         currentDatabase: null,
-        currentTable: null
+        currentTable: null,
+        tableSearch: ''
       }
     },
     computed: {
       connectButtonClass: function () {
         var disabled = false
-        if (!(this.newInstance.server.value && this.newInstance.type.value)) {
+        if (!(this.newInstance.server.value && this.newInstance.port.value) && this.newInstance.type.value !== 'ODBC') {
+          disabled = true
+        } else if (!(this.newInstance.server.value)) {
           disabled = true
         }
         return {
@@ -455,7 +449,6 @@
                 append_table: [],
                 tables: [],
                 ds_name: '',
-                search: '',
                 editing: false
               }
               if (data.database === '') {
@@ -527,18 +520,78 @@
   .center{
     text-align: center;
   }
+
+  .table-view {
+    max-height: 300px;
+    overflow: scroll;
+    width: auto;
+  }
+
   .right {
     float: right;
-    margin-top: 0px;
-  }
-  .add{
-    width: 100%;
     margin-top: 0;
+    margin-left: 8px;
   }
-  .table-view {
-    height: 600px;
-    overflow-y: scroll;
-    margin: 2px 0 10px 0;
-    /*float: right;*/
+
+  /**
+   * Framework starts from here ...
+   * ------------------------------
+   */
+
+  .tree,
+  .tree ul {
+    margin:0 0 0 1em; /* indentation */
+    padding:0;
+    list-style:none;
+    color:#369;
+    position:relative;
+  }
+
+  .tree ul {margin-left:.5em} /* (indentation/2) */
+
+  .tree:before,
+  .tree ul:before {
+    content:"";
+    display:block;
+    width:0;
+    position:absolute;
+    top:0;
+    bottom:0;
+    left:0;
+    border-left:1px solid;
+  }
+
+  .tree li {
+    margin:0;
+    padding:0.2em 1.5em; /* indentation + .5em */
+    line-height:2em; /* default list item's `line-height` */
+    font-weight:bold;
+    position:relative;
+  }
+
+  .tree-input:before {
+    margin-bottom: 20px;
+    border-top:2px solid;
+    margin-top:12px !important; /* border top width */
+  }
+
+  .tree li:before {
+    content:"";
+    display:block;
+    width:15px; /* same with indentation */
+    height:0;
+    border-top:2px solid;
+    margin-top:-2px; /* border top width */
+    position:absolute;
+    top:1em; /* (line-height/2) */
+    left:0;
+  }
+
+
+  .tree li:last-child:before {
+    background:#f5f7fa; /* same with body background */
+    height:auto;
+    top:1em; /* (line-height/2) */
+    bottom:0;
   }
 </style>

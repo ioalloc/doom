@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <nav class="nav has-shadow">
+    <nav class="nav has-shadow is-flex">
       <div class="nav-left">
         <a class="nav-item is-tab" :class="tabs.configure.class" @click="switchTab('configure')">
           配置
@@ -39,23 +39,25 @@
           <a class="button is-warning" href="#" @click="userOptClicked">
             <span>{{ userOpt }}</span>
           </a>
-          <a class="button is-info" href="https://www.bdp.cn">
+          <a class="button is-info" target="_blank" href="https://www.bdp.cn">
             <span>官网</span>
           </a>
         </span>
       </div>
     </nav>
-    <model v-ref:model></model>
-    <configure v-ref:configure></configure>
-    <crontab v-ref:crontab></crontab>
-    <sync v-ref:sync></sync>
-    <upgrade v-ref:upgrade></upgrade>
+    <div class="main-page">
+      <model v-ref:model></model>
+      <configure v-ref:configure></configure>
+      <crontab v-ref:crontab></crontab>
+      <sync v-ref:sync></sync>
+      <upgrade v-ref:upgrade></upgrade>
+    </div>
   </div>
   <footer class="footer">
-    <div class="container">
-      <div class="content has-text-centered">
+    <div class="">
+      <div class="has-text-centered">
         <p>
-          <strong>BDP数据同步客户端</strong> by <a href="https://www.bdp.cn">商业数据平台</a>
+          <strong>BDP数据同步客户端</strong> by <a target="_blank" href="https://www.bdp.cn">商业数据平台</a>
         </p>
       </div>
     </div>
@@ -146,10 +148,30 @@
 
 <style>
   @import "assets/css/bulma.css";
+
+  html, body {
+    height: 100%;
+  }
+
+  #app {
+    height: 100%;
+    padding-bottom: 60px;
+    overflow: scroll;
+  }
+
+  .footer {
+    background: #f5f7fa;
+    position: absolute;
+    bottom: 0;
+    width: 100%;
+    max-height: 10px;
+  }
+
   .checkbox input {
     margin-right: 5px;
   }
   em {
     margin: auto;
   }
+
 </style>

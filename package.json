@@ -1,7 +1,7 @@
 {
-  "name": "doom",
+  "name": "搬数据的小红帽",
   "version": "1.0.0",
-  "description": "A Vue.js project",
+  "description": "我们不生产数据, 我们只是数据的搬运工",
   "author": "wangxiwei <wangxiwei@haizhi.com>",
   "private": true,
   "scripts": {
