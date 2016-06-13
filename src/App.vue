@@ -2,6 +2,11 @@
   <div id="app">
     <nav class="nav has-shadow is-flex">
       <div class="nav-left">
+
+        <a class="nav-item">
+          <img src="assets/logo.png" alt="">
+        </a>
+
         <a class="nav-item is-tab" :class="tabs.configure.class" @click="switchTab('configure')">
           配置
         </a>

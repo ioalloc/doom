@@ -230,7 +230,7 @@
       </section>
       <footer class="modal-card-foot">
         <a class="button is-primary" @click="connection" :class="[connectButtonClass,classes.newInstanceConnect]">测试连接</a>
-        <a class="button is-primary right" @click="addInstance('confirm')" :class="classes.newInstanceConfirm">确认</a>
+        <a class="button is-primary right" @click="addInstance('confirm')" :class="[classes.newInstanceConfirm,disabled.newInstanceConfirm]">确认</a>
         <a class="button" @click="addInstance('cancel')">取消</a>
       </footer>
     </div>
@@ -330,6 +330,14 @@
           pwd: pwd,
           sid: sid,
           odbc: odbc
+        }
+      },
+      disabled: function () {
+        var newInstanceConfirm = !this.newInstance.connected
+        return {
+          newInstanceConfirm: {
+            'is-disabled': newInstanceConfirm
+          }
         }
       }
     },
@@ -491,18 +499,23 @@
           database: this.newInstance.database.value,
           sid: this.newInstance.sid.value
         }
-        this.newInstance.connected = false
-        this.classes.newInstanceConnect['is-loading'] = true
-        this.$http.post('/api/connect', data).then(function (response) {
-          this.newInstance.databases = response.data
-          this.newInstance.connected = true
-          this.classes.newInstanceConnect['is-loading'] = false
-          this.newInstance.successTip = '连接成功, 请选择表'
-        },
-        function (response) {
-          window.alert(response.data)
-          this.classes.newInstanceConnect['is-loading'] = false
-        })
+        if (isNaN(data.port)) {
+          window.alert('端口必须为数字')
+          this.newInstance.successTip = ''
+        } else {
+          this.newInstance.connected = false
+          this.classes.newInstanceConnect['is-loading'] = true
+          this.$http.post('/api/connect', data).then(function (response) {
+            this.newInstance.databases = response.data
+            this.newInstance.connected = true
+            this.classes.newInstanceConnect['is-loading'] = false
+            this.newInstance.successTip = '连接成功'
+            this.newInstance.database.value = response.data[0]
+          }, function (response) {
+            window.alert(response.data)
+            this.classes.newInstanceConnect['is-loading'] = false
+          })
+        }
       },
       saveAll: function () {
         this.$http.post('/api/save', JSON.stringify(this.databases)).then(function (response) {
