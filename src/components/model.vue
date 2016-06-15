@@ -93,7 +93,7 @@
           this.$parent.userOpt = '注销'
           this.$parent.initConfigure()
         }, function (response) {
-          window.alert(response.data)
+          this.$parent.alert('登录失败, 请检查信息是否正确')
         })
       },
       show: function (type) {

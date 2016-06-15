@@ -344,6 +344,9 @@
     ready: function () {
     },
     methods: {
+      alert: function (body) {
+        this.$parent.alert(body)
+      },
       show: function () {
         this.classes.template['is-hidden'] = false
       },
@@ -365,7 +368,7 @@
           },
           function (response) {
             if (from === 'init') {
-              window.alert(response.data)
+              this.alert(response.data)
             } else {
               if (response.status === 401) {
                 this.$parent.isLogin = false
@@ -391,7 +394,7 @@
             this.currentDatabase.tables = response.data
             this.currentDatabase.loaded = true
           }, function (response) {
-            window.alert(response.data)
+            this.alert(response.data)
           })
         }
       },
@@ -426,7 +429,7 @@
               }
             }
           }, function (response) {
-            window.alert(response.data)
+            this.alert(response.data)
           })
         }
       },
@@ -461,7 +464,7 @@
                 editing: false
               }
               if (data.database === '') {
-                window.alert('请选择数据库')
+                this.alert('请选择数据库')
               } else {
                 this.classes.newInstanceConfirm['is-loading'] = true
                 this.$http.post('/api/database', data).then(function (response) {
@@ -469,7 +472,7 @@
                   this.classes.newInstance['is-active'] = false
                   this.classes.newInstanceConfirm['is-loading'] = false
                 }, function (response) {
-                  window.alert(response.data)
+                  this.alert(response.data)
                   this.classes.newInstanceConfirm['is-loading'] = false
                 })
               }
@@ -490,7 +493,7 @@
                 }
               }
             }, function (response) {
-              window.alert(response.data)
+              this.alert(response.data)
             })
           }
         }.bind(this))
@@ -506,7 +509,7 @@
           sid: this.newInstance.sid.value
         }
         if (isNaN(data.port)) {
-          window.alert('端口必须为数字')
+          this.alert('端口必须为数字')
           this.newInstance.successTip = ''
         } else {
           this.newInstance.connected = false
@@ -518,16 +521,16 @@
             this.newInstance.successTip = '连接成功'
             this.newInstance.database.value = response.data[0]
           }, function (response) {
-            window.alert(response.data)
+            this.alert(response.data)
             this.classes.newInstanceConnect['is-loading'] = false
           })
         }
       },
       saveAll: function () {
         this.$http.post('/api/save', JSON.stringify(this.databases)).then(function (response) {
-          window.alert('保存成功')
+          this.alert('保存成功')
         }, function (response) {
-          window.alert(response.data)
+          this.alert(response.data)
         })
       }
     }

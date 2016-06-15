@@ -93,9 +93,9 @@
       },
       createTask: function () {
         this.$http.post('/api/crontab', {hour: this.hour, minute: this.minute, taskName: this.taskName}).then(function (response) {
-          window.alert('创建成功')
+          this.$parent.alert('创建成功')
         }, function (response) {
-          window.alert(response.data)
+          this.$parent.alert(response.data)
         })
       }
     }

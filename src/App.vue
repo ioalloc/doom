@@ -51,11 +51,11 @@
       </div>
     </nav>
     <div class="main-page">
-      <model v-ref:model></model>
       <configure v-ref:configure></configure>
       <crontab v-ref:crontab></crontab>
       <sync v-ref:sync></sync>
       <upgrade v-ref:upgrade></upgrade>
+      <model v-ref:model></model>
     </div>
   </div>
   <footer class="footer">
@@ -143,18 +143,18 @@
       },
       userOptClicked: function () {
         if (this.state !== CONST.state.idle) {
-          window.alert('当前正在' + this.state + ', 请稍后')
+          this.alert('当前正在' + this.state + ', 请稍后')
           return
         }
         this.$refs['model'].show(this.userOpt)
       },
       shutdown: function () {
         if (this.state !== CONST.state.idle) {
-          window.alert('当前正在' + this.state + ', 请稍后')
+          this.alert('当前正在' + this.state + ', 请稍后')
           return
         }
         this.$http.get('/api/shutdown').then(function () {
-          window.alert('已关闭')
+          this.alert('已关闭')
         })
       },
       /**
@@ -167,12 +167,15 @@
        *
        *
        * buttons: [
-       *  {text: '确认', ret 'ok'},       //默认
-       *  {text: '取消', ret: 'cancel'}
+       *  {name: '确认', ret 'ok'},       //默认
+       *  {name: '取消', ret: 'cancel'}
        * ]
        */
       MessageBox: function (title, body, buttons, callback) {
         this.$refs['model'].showMessageBox(title, body, buttons, callback)
+      },
+      alert: function (body) {
+        this.MessageBox('提示', body, [{name: '确认', class: 'is-info'}], function () {})
       }
     }
   }

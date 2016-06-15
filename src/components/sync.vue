@@ -40,6 +40,9 @@
       }
     },
     methods: {
+      alert: function (body) {
+        this.$parent.alert(body)
+      },
       show: function () {
         this.templateClass['is-hidden'] = false
       },
@@ -48,17 +51,17 @@
       },
       sync: function () {
         if (this.$parent.state !== CONST.state.idle) {
-          window.alert('当前正在' + this.$parent.state + ', 请稍后再试')
+          this.alert('当前正在' + this.$parent.state + ', 请稍后再试')
           return
         }
         if (this.timer) {
-          window.alert('已在运行')
+          this.alert('已在运行')
         } else {
           this.$http.get('/api/run').then(function (response) {
             this.timer = setTimeout(this.log, 300)
             this.$parent.state = CONST.state.syncing
           }, function (response) {
-            window.alert(response.data)
+            this.alert(response.data)
           })
         }
       },
@@ -69,10 +72,10 @@
             this.timer = null
             this.$parent.state = CONST.state.idle
           } else {
-            window.alert('没有在运行')
+            this.alert('没有在运行')
           }
         }, function (response) {
-          window.alert(response.data)
+          this.alert(response.data)
         })
       },
       clear: function () {

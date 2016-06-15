@@ -79,7 +79,7 @@
       },
       upgrade: function () {
         if (this.$parent.state !== CONST.state.idle) {
-          window.alert('当前正在' + this.$parent.state + ', 请稍后进行')
+          this.$parent.alert('当前正在' + this.$parent.state + ', 请稍后进行')
           return
         }
         this.$http.get('/api/upgrade').then(function (response) {
@@ -99,7 +99,7 @@
               clearTimeout(this.timer)
               this.classes.upgradeButton['is-loading'] = false
               this.classes.upgradeButton['is-disabled'] = true
-              this.button = '重启后生效'
+              this.button = '安装成, 请手动重启后生效'
               this.$parent.state = CONST.state.idle
             } else if (stat.status === 'downloading') {
               this.downloaded = stat.received
