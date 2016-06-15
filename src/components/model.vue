@@ -39,6 +39,23 @@
       </footer>
     </div>
   </div>
+
+  <div class="modal" :class="messageBox.class">
+    <div class="modal-background"></div>
+    <div class="modal-card">
+      <header class="modal-card-head">
+        <p class="modal-card-title">{{ messageBox.title }}</p>
+      </header>
+      <section class="modal-card-body">
+        <p class="control">
+          {{ messageBox.body }}
+        </p>
+      </section>
+      <footer class="modal-card-foot">
+        <a v-for="button in messageBox.buttons" class="button {{ button.class }}" @click="messageBoxClicked($index)">{{ button.name }}</a>
+      </footer>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -51,7 +68,22 @@
           password: ''
         },
         loginState: '',
-        logoutState: ''
+        logoutState: '',
+        messageBox: {
+          title: '',
+          body: '',
+          class: {
+            'is-active': false
+          },
+          callback: function (ret) {},
+          buttons: [
+            {
+              name: '确认',
+              class: 'is-info',
+              ret: 'ok'
+            }
+          ]
+        }
       }
     },
     methods: {
@@ -82,6 +114,18 @@
       },
       showLogin: function () {
         this.loginState = 'is-active'
+      },
+      showMessageBox: function (title, body, buttons, callback) {
+        this.messageBox.title = title
+        this.messageBox.body = body
+        this.messageBox.buttons = buttons
+        this.messageBox.callback = callback
+        this.messageBox.class['is-active'] = true
+      },
+      messageBoxClicked: function (index) {
+        let ret = this.messageBox.buttons[index].ret
+        this.messageBox.class['is-active'] = false
+        this.messageBox.callback(ret)
       }
     }
   }

@@ -23,7 +23,7 @@
                     <a class="button is-small" @click="dbConfigure($index)">配置</a>
                     <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
                   </p>
-                  <ul v-if="database.editing" class="tree">
+                  <ul v-if="database.editing" class="tree table-view">
                     <li class="tree-input">
                       <input class="input" placeholder="数据源名称(可选)" v-model="database.ds_name">
                     </li>
@@ -353,6 +353,7 @@
       loadConfigure: function (from) {
         this.$http.get('/api/database').then(
           function (response) {
+            this.databases = []
             for (var i = 0; i < response.data.length; i++) {
               var database = response.data[i]
               database.tables = []
@@ -477,17 +478,22 @@
         }
       },
       removeDatabase: function (index) {
-        var removed = this.databases[index]
-        this.$http.delete('/api/database', removed).then(function (response) {
-          if (response.data === 'success') {
-            this.databases.splice(index, 1)
-            if (removed === this.currentDatabase) {
-              this.currentDatabase = null
-            }
+        this.$parent.MessageBox('删除数据库', '确认要删除数据库吗?', [{name: '确认', ret: 'ok', class: 'is-danger'}, {name: '取消', ret: 'cancel', class: 'is-info'}], function (ret) {
+          if (ret === 'ok') {
+            var removed = this.databases[index]
+
+            this.$http.delete('/api/database', removed).then(function (response) {
+              if (response.data === 'success') {
+                this.databases.splice(index, 1)
+                if (removed === this.currentDatabase) {
+                  this.currentDatabase = null
+                }
+              }
+            }, function (response) {
+              window.alert(response.data)
+            })
           }
-        }, function (response) {
-          window.alert(response.data)
-        })
+        }.bind(this))
       },
       connection: function () {
         var data = {
@@ -535,7 +541,7 @@
   }
 
   .table-view {
-    max-height: 300px;
+    max-height: 500px;
     overflow: scroll;
     width: auto;
   }
@@ -585,7 +591,11 @@
   .tree-input:before {
     margin-bottom: 20px;
     border-top:2px solid;
-    margin-top:12px !important; /* border top width */
+    margin-top:3px !important; /* border top width */
+  }
+
+  .tree-input {
+    margin: 10px auto 10px auto !important;
   }
 
   .tree li:before {

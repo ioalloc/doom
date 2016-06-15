@@ -27,6 +27,8 @@
 </template>
 
 <script>
+  import CONST from '../const'
+
   export default{
     data () {
       return {
@@ -45,21 +47,27 @@
         this.templateClass['is-hidden'] = true
       },
       sync: function () {
-        this.$http.get('/api/run').then(function (response) {
-          if (this.timer) {
-            window.alert('已在运行')
-          } else {
+        if (this.$parent.state !== CONST.state.idle) {
+          window.alert('当前正在' + this.$parent.state + ', 请稍后再试')
+          return
+        }
+        if (this.timer) {
+          window.alert('已在运行')
+        } else {
+          this.$http.get('/api/run').then(function (response) {
             this.timer = setTimeout(this.log, 300)
-          }
-        }, function (response) {
-          window.alert(response.data)
-        })
+            this.$parent.state = CONST.state.syncing
+          }, function (response) {
+            window.alert(response.data)
+          })
+        }
       },
       stop: function () {
         this.$http.get('/api/stop').then(function (response) {
           if (this.timer) {
             clearTimeout(this.timer)
             this.timer = null
+            this.$parent.state = CONST.state.idle
           } else {
             window.alert('没有在运行')
           }
@@ -77,9 +85,10 @@
             this.logs.push(response.data[i])
             if (response.data[i] === 'task finished') {
               clearTimeout(this.timer)
+              this.timer = null
               isFinished = true
+              this.$parent.state = CONST.state.idle
             }
-            console.info(response.data[i] + ' ' + isFinished)
           }
         })
         var log = document.getElementById('log')

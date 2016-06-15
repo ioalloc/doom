@@ -75,6 +75,7 @@
   import crontab from './components/crontab.vue'
   import sync from './components/sync.vue'
   import upgrade from './components/upgrade.vue'
+  import CONST from './const'
 
   export default {
     data () {
@@ -109,7 +110,8 @@
             }
           }
         },
-        currentTab: null
+        currentTab: null,
+        state: CONST.state.idle
       }
     },
     components: {
@@ -140,12 +142,37 @@
         this.$refs['model'].show('登录')
       },
       userOptClicked: function () {
+        if (this.state !== CONST.state.idle) {
+          window.alert('当前正在' + this.state + ', 请稍后')
+          return
+        }
         this.$refs['model'].show(this.userOpt)
       },
       shutdown: function () {
+        if (this.state !== CONST.state.idle) {
+          window.alert('当前正在' + this.state + ', 请稍后')
+          return
+        }
         this.$http.get('/api/shutdown').then(function () {
           window.alert('已关闭')
         })
+      },
+      /**
+       * 显示一个对话框, 并且返回用户的选择
+       * @param title: 对话框标题
+       * @param body: 对话内容
+       * @param buttons: 需要有的按键
+       * @param callback: 回调函数
+       * @constructor
+       *
+       *
+       * buttons: [
+       *  {text: '确认', ret 'ok'},       //默认
+       *  {text: '取消', ret: 'cancel'}
+       * ]
+       */
+      MessageBox: function (title, body, buttons, callback) {
+        this.$refs['model'].showMessageBox(title, body, buttons, callback)
       }
     }
   }
@@ -156,6 +183,7 @@
 
   html, body {
     height: 100%;
+    width: 100%;
   }
 
   #app {
