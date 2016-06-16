@@ -8,9 +8,6 @@
             已添加数据库
             <a class="button right is-outlined is-success" @click="addInstance('open')">添加实例</a>
             <a class="button right is-info" @click="saveAll">保存全部</a>
-            <p class="control">
-              <input class="input" type="text" placeholder="搜索表" v-model="tableSearch">
-            </p>
           </p>
           <div class="panel-block" v-for="database in databases">
             <div  class="">
@@ -20,26 +17,29 @@
                   <span class="tag">{{ database.database }}</span>
                   <span class="tag is-success">{{ database.type }}</span>
                   <p class="control has-addons right center">
-                    <a class="button is-small" @click="dbConfigure($index)">配置</a>
+                    <a class="button is-small {{ database.class }}" @click="dbConfigure($index)">配置</a>
                     <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
                   </p>
                   <ul v-if="database.editing" class="tree table-view">
                     <li class="tree-input">
                       <input class="input" placeholder="数据源名称(可选)" v-model="database.ds_name">
                     </li>
-                    <li v-for="table in database.append_table | filterBy tableSearch">
+                    <li class="tree-input">
+                      <input class="input" placeholder="搜索表" v-model="database.search">
+                    </li>
+                    <li v-for="table in database.append_table | filterBy database.search | orderBy  table.name">
                       <p class="control tag is-info">
                         <label>
-                          <input type="checkbox" checked @click="tableClicked($event, 'unchecked')" name="{{ table.name }}">
+                          <input type="checkbox" checked @click="tableClicked(database._id, table.name, 'unchecked')" name="{{ table.name }}">
                           {{ table.name }}
                         </label>
                       </p>
-                      <a class="button is-small right" @click="tableEdit($event)">编辑</a>
+                      <a class="button is-small right" @click="tableEdit(database._id, table.name)">编辑</a>
                     </li>
-                    <li v-for="table in database.tables | filterBy tableSearch">
+                    <li v-for="table in database.tables | filterBy database.search | orderBy table.name">
                       <p class="control tag">
                         <label>
-                          <input type="checkbox" @click="tableClicked($event, 'checked')" name="table.name">
+                          <input type="checkbox" @click="tableClicked(database._id, table.name, 'checked')" name="{{ table.name }}">
                           {{ table.name }}
                         </label>
                       </p>
@@ -155,6 +155,15 @@
           </p>
         </div>
 
+        <div v-if="visible.odbc">
+          <label class="label">数据源名称(仅限Windows 32)</label>
+          <p class="control has-icon has-icon-right">
+            <input class="input is-success" type="text" v-model="newInstance.server.value" placeholder="必填">
+            <i class="fa fa-check"></i>
+            <span class="help is-success">{{newInstance.server.help}}</span>
+          </p>
+        </div>
+
         <div v-if="visible.uid">
           <label class="label">用户名</label>
           <p class="control has-icon has-icon-right">
@@ -179,15 +188,6 @@
             <input class="input is-success" type="text" v-model="newInstance.sid.value">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.sid.help}}</span>
-          </p>
-        </div>
-
-        <div v-if="visible.odbc">
-          <label class="label">数据源名称(仅限Windows 32)</label>
-          <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="text" v-model="newInstance.server.value" placeholder="必填">
-            <i class="fa fa-check"></i>
-            <span class="help is-success">{{newInstance.server.help}}</span>
           </p>
         </div>
 
@@ -289,7 +289,6 @@
         },
         databases: [
         ],
-        currentDatabase: null,
         currentTable: null,
         tableSearch: ''
       }
@@ -316,7 +315,7 @@
         var input = this.newInstance
 
         if (input.type.value === 'ODBC') {
-          odbc = true
+          odbc = uid = pwd = true
         } else if (input.type.value === 'ORACLE') {
           server = port = uid = pwd = sid = true
         } else {
@@ -362,6 +361,7 @@
               database.tables = []
               database.editing = false
               database.search = ''
+              database.class = ''
               this.databases.push(database)
             }
             this.$parent.userOpt = '注销'
@@ -379,46 +379,72 @@
         )
       },
       dbConfigure: function (index) {
-        this.currentDatabase = this.databases[index]
-        this.currentDatabase.editing = !this.currentDatabase.editing
-        if (!this.currentDatabase.hasOwnProperty('loaded')) {
+        var database = this.databases[index]
+        database.editing = !database.editing
+        if (!database.hasOwnProperty('loaded')) {
           var exists = []
-          for (var i in this.currentDatabase.append_table) {
-            exists.push(this.currentDatabase.append_table[i].name)
+          for (var i in database.append_table) {
+            exists.push(database.append_table[i].name)
           }
           var data = {
             exists: exists,
-            _id: this.currentDatabase._id
+            _id: database._id
           }
+          database.class = 'is-loading'
           this.$http.post('/api/table/filter', data).then(function (response) {
-            this.currentDatabase.tables = response.data
-            this.currentDatabase.loaded = true
+            database.tables = response.data
+            database.loaded = true
+            database.class = ''
           }, function (response) {
             this.alert(response.data)
+            database.class = ''
           })
         }
       },
-      tableClicked: function (index, state) {
+      tableClicked: function (dbId, tbName, state) {
         // todo index to event
-        var table
-        console.info(index)
+        let database, table
+        for (let i in this.databases) {
+          if (this.databases[i]._id === dbId) {
+            database = this.databases[i]
+          }
+        }
         if (state === 'checked') {
-          table = this.currentDatabase.tables.splice(index, 1)
-          this.currentDatabase.append_table = this.currentDatabase.append_table.concat(table)
+          for (let i in database.tables) {
+            if (database.tables[i].name === tbName) {
+              table = database.tables.splice(i, 1)
+              database.append_table = database.append_table.concat(table)
+              break
+            }
+          }
         } else if (state === 'unchecked') {
-          table = this.currentDatabase.append_table.splice(index, 1)
-          this.currentDatabase.tables = this.currentDatabase.tables.concat(table)
+          for (let i in database.tables) {
+            if (database.append_table[i].name === tbName) {
+              table = database.append_table.splice(i, 1)
+              database.tables = database.tables.concat(table)
+              break
+            }
+          }
         }
       },
-      tableEdit: function (index) {
+      tableEdit: function (dbId, tbName) {
         // todo index to event
-        this.currentTable = this.currentDatabase.append_table[index]
+        for (let i in this.databases) {
+          if (dbId === this.databases[i]._id) {
+            let database = this.databases[i]
+            for (let i in database.append_table) {
+              if (tbName === database.append_table[i].name) {
+                this.currentTable = database.append_table[i]
+              }
+            }
+          }
+        }
         if (!this.currentTable.hasOwnProperty('index_field')) {
           this.currentTable.index_field = {name: ''}
         }
         if (!this.currentTable.hasOwnProperty('loaded')) {
           var params = {
-            _id: this.currentDatabase._id,
+            _id: dbId,
             name: this.currentTable.name
           }
           this.$http.get('/api/table/preview', params).then(function (response) {
@@ -491,9 +517,6 @@
             this.$http.delete('/api/database', removed).then(function (response) {
               if (response.data === 'success') {
                 this.databases.splice(index, 1)
-                if (removed === this.currentDatabase) {
-                  this.currentDatabase = null
-                }
               }
             }, function (response) {
               this.alert(response.data)

@@ -14,7 +14,7 @@
           <input class="input" placeholder="用户名" v-model="userInfo.username">
         </p>
         <p class="control">
-          <input class="input" type="password" placeholder="密码" v-model="userInfo.password">
+          <input class="input" type="password" placeholder="密码" v-model="userInfo.password" @keyup.enter="login">
         </p>
       </section>
       <footer class="modal-card-foot">
@@ -34,7 +34,7 @@
         </p>
       </section>
       <footer class="modal-card-foot">
-        <a href="/api/logout" class="button is-warning">确认</a>
+        <a class="button is-warning" @click="logout">确认</a>
         <a class="button is-info" @click="close">取消</a>
       </footer>
     </div>
@@ -111,6 +111,13 @@
       close: function () {
         this.loginState = ''
         this.logoutState = ''
+      },
+      logout: function () {
+        this.$http.get('/api/logout').then(function (response) {
+          window.location.href = '/'
+        }, function (response) {
+          this.$parent.alert(response.data)
+        })
       },
       showLogin: function () {
         this.loginState = 'is-active'

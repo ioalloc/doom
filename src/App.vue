@@ -201,6 +201,9 @@
     bottom: 0;
     width: 100%;
     max-height: 10px;
+    padding-bottom: 40px;
+    padding-top: 0;
+    margin-bottom: 0;
   }
 
   .checkbox input {
