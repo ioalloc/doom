@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <nav class="nav has-shadow is-flex">
+    <nav class="nav has-shadow is-flexed">
       <div class="nav-left">
 
         <a class="nav-item">
@@ -57,16 +57,16 @@
       <upgrade v-ref:upgrade></upgrade>
       <model v-ref:model></model>
     </div>
-  </div>
-  <footer class="footer">
-    <div class="">
-      <div class="has-text-centered">
-        <p>
-          <strong>BDP数据同步客户端</strong> by <a target="_blank" href="https://www.bdp.cn">商业数据平台</a>
-        </p>
+    <footer class="footer">
+      <div class="">
+        <div class="has-text-centered">
+          <p>
+            <strong>BDP数据同步客户端</strong> by <a target="_blank" href="https://www.bdp.cn">商业数据平台</a>
+          </p>
+        </div>
       </div>
-    </div>
-  </footer>
+    </footer>
+  </div>
 </template>
 
 <script>
@@ -191,13 +191,17 @@
 
   #app {
     height: 100%;
+    /*overflow-y: scroll;*/
+  }
+
+  .main-page {
+    overflow-y: scroll;
     padding-bottom: 60px;
-    overflow: scroll;
   }
 
   .footer {
     background: #f5f7fa;
-    position: absolute;
+    position: fixed;
     bottom: 0;
     width: 100%;
     max-height: 10px;

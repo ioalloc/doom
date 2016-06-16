@@ -17,6 +17,7 @@
                   <span class="tag">{{ database.database }}</span>
                   <span class="tag is-success">{{ database.type }}</span>
                   <p class="control has-addons right center">
+                    <a class="button is-small is-primary" v-if="database.editing" @click="tableToggle($index)">反选</a>
                     <a class="button is-small {{ database.class }}" @click="dbConfigure($index)">配置</a>
                     <a class="button is-small is-danger" @click="removeDatabase($index)">删除</a>
                   </p>
@@ -53,7 +54,7 @@
         </nav>
       </div>
       <!--数据库配置详细页面-->
-      <div class="column">
+      <div class="column is-two-thirds">
         <nav class="panel">
           <p class="panel-heading">
             表配置
@@ -63,17 +64,19 @@
             <p class="control">
               <a class="button is-primary" @click="selectAll">全选</a>
             </p>
-            <table class="table is-bordered is-striped is-narrow">
-              <thead>
-                <th v-for="field in currentTable.fields">
-                  <label class="checkbox tag">
-                    <input type="checkbox" id="{{field.name}}" value="{{field.name}}" v-model="currentTable.select">
-                    {{ field.name }}
-                  </label>
-                  <em class="">{{ field.type }}</em>
-                </th>
-              </thead>
-            </table>
+            <div class="table-container">
+              <table class="table is-bordered is-striped is-narrow">
+                <thead>
+                  <th v-for="field in currentTable.fields">
+                    <label class="checkbox tag">
+                      <input type="checkbox" id="{{field.name}}" value="{{field.name}}" v-model="currentTable.select">
+                      {{ field.name }}
+                    </label>
+                    <em class="">{{ field.type }}</em>
+                  </th>
+                </thead>
+              </table>
+            </div>
           </div>
         </nav>
         <nav class="panel">
@@ -140,7 +143,7 @@
         <div v-if="visible.server">
           <label class="label">服务器地址</label>
           <p class="control">
-            <input class="input is-success" type="text" placeholder="必填" v-model="newInstance.server.value">
+            <input class="input" :class="classes.newInstanceInput" type="text" placeholder="必填" v-model="newInstance.server.value">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.server.help}}</span>
           </p>
@@ -149,7 +152,7 @@
         <div v-if="visible.port">
           <label class="label">服务器端口</label>
           <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="text" v-model="newInstance.port.value" placeholder="必填">
+            <input class="input" :class="classes.newInstanceInput" type="text" v-model="newInstance.port.value" placeholder="必填">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.port.help}}</span>
           </p>
@@ -158,7 +161,7 @@
         <div v-if="visible.odbc">
           <label class="label">数据源名称(仅限Windows 32)</label>
           <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="text" v-model="newInstance.server.value" placeholder="必填">
+            <input class="input" :class="classes.newInstanceInput" type="text" v-model="newInstance.server.value" placeholder="必填">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.server.help}}</span>
           </p>
@@ -167,7 +170,7 @@
         <div v-if="visible.uid">
           <label class="label">用户名</label>
           <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="text" v-model="newInstance.uid.value">
+            <input class="input" :class="classes.newInstanceInput" type="text" v-model="newInstance.uid.value">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.uid.help}}</span>
           </p>
@@ -176,7 +179,7 @@
         <div v-if="visible.pwd">
           <label class="label">密码</label>
           <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="password" v-model="newInstance.pwd.value">
+            <input class="input" :class="classes.newInstanceInput" type="password" v-model="newInstance.pwd.value">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.pwd.help}}</span>
           </p>
@@ -185,7 +188,7 @@
         <div v-if="visible.sid">
           <label class="label">SID</label>
           <p class="control has-icon has-icon-right">
-            <input class="input is-success" type="text" v-model="newInstance.sid.value">
+            <input class="input" :class="classes.newInstanceInput" type="text" v-model="newInstance.sid.value">
             <i class="fa fa-check"></i>
             <span class="help is-success">{{newInstance.sid.help}}</span>
           </p>
@@ -194,19 +197,19 @@
         <label class="label">类型</label>
         <p class="control">
           <label class="radio">
-            <input type="radio" name="question" value="MYSQL" v-model="newInstance.type.value">
+            <input type="radio" name="question" value="MYSQL" :class="classes.newInstanceInput" v-model="newInstance.type.value">
             MYSQL
           </label>
           <label class="radio">
-            <input type="radio" name="question" value="MSSQL" v-model="newInstance.type.value">
+            <input type="radio" name="question" value="MSSQL" :class="classes.newInstanceInput" v-model="newInstance.type.value">
             MSSQL
           </label>
           <label class="radio">
-            <input type="radio" name="question" value="ORACLE" v-model="newInstance.type.value">
+            <input type="radio" name="question" value="ORACLE" :class="classes.newInstanceInput" v-model="newInstance.type.value">
             ORACLE
           </label>
           <label class="radio">
-            <input type="radio" name="question" value="ODBC" v-model="newInstance.type.value">
+            <input type="radio" name="question" value="ODBC" :class="classes.newInstanceInput" v-model="newInstance.type.value">
             ODBC
           </label>
         </p>
@@ -216,7 +219,7 @@
           <p class="control has-icon has-icon-right level-left">
             <div class="level-item">
               <span class="select">
-                <select v-model="newInstance.database.value">
+                <select v-model="newInstance.database.value" :class="classes.newInstanceInput" >
                   <option v-for="database in newInstance.databases">{{database}}</option>
                 </select>
               </span>
@@ -253,6 +256,9 @@
           },
           newInstanceConfirm: {
             'is-loading': false
+          },
+          newInstanceInput: {
+            'is-disabled': false
           }
         },
         newInstance: {
@@ -467,6 +473,12 @@
           this.currentTable.select.push(this.currentTable.fields[i].name)
         }
       },
+      tableToggle: function (index) {
+        let database = this.databases[index]
+        let appendTable = database.append_table
+        database.append_table = database.tables
+        database.tables = appendTable
+      },
       addInstance: function (action) {
         switch (action) {
           case 'open': {
@@ -490,7 +502,8 @@
                 append_table: [],
                 tables: [],
                 ds_name: '',
-                editing: false
+                editing: false,
+                db_increase_type: 'origin'
               }
               if (data.database === '') {
                 this.alert('请选择数据库')
@@ -540,15 +553,18 @@
         } else {
           this.newInstance.connected = false
           this.classes.newInstanceConnect['is-loading'] = true
+          this.classes.newInstanceInput['is-disabled'] = true
           this.$http.post('/api/connect', data).then(function (response) {
             this.newInstance.databases = response.data
             this.newInstance.connected = true
             this.classes.newInstanceConnect['is-loading'] = false
+            this.classes.newInstanceInput['is-disabled'] = false
             this.newInstance.successTip = '连接成功'
             this.newInstance.database.value = response.data[0]
           }, function (response) {
             this.alert(response.data)
             this.classes.newInstanceConnect['is-loading'] = false
+            this.classes.newInstanceInput['is-disabled'] = false
           })
         }
       },
@@ -567,6 +583,10 @@
   @import "../assets/css/bulma.css";
   .center{
     text-align: center;
+  }
+
+  .table-container {
+    overflow-y: scroll;
   }
 
   .table-view {
@@ -588,7 +608,7 @@
 
   .tree,
   .tree ul {
-    margin:0 0 0 1em; /* indentation */
+    margin:1em 0 0 1em; /* indentation */
     padding:0;
     list-style:none;
     color:#369;

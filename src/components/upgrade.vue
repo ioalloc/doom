@@ -99,7 +99,7 @@
               clearTimeout(this.timer)
               this.classes.upgradeButton['is-loading'] = false
               this.classes.upgradeButton['is-disabled'] = true
-              this.button = '安装成, 请手动重启后生效'
+              this.button = '安装成功, 请手动重启后生效'
               this.$parent.state = CONST.state.idle
             } else if (stat.status === 'downloading') {
               this.downloaded = stat.received
