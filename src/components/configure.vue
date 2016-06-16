@@ -30,16 +30,16 @@
                     <li v-for="table in database.append_table | filterBy tableSearch">
                       <p class="control tag is-info">
                         <label>
-                          <input type="checkbox" checked @click="tableClicked($index, 'unchecked')">
+                          <input type="checkbox" checked @click="tableClicked($event, 'unchecked')" name="{{ table.name }}">
                           {{ table.name }}
                         </label>
                       </p>
-                      <a class="button is-small right" @click="tableEdit($index)">编辑</a>
+                      <a class="button is-small right" @click="tableEdit($event)">编辑</a>
                     </li>
                     <li v-for="table in database.tables | filterBy tableSearch">
                       <p class="control tag">
                         <label>
-                          <input type="checkbox" @click="tableClicked($index, 'checked')">
+                          <input type="checkbox" @click="tableClicked($event, 'checked')" name="table.name">
                           {{ table.name }}
                         </label>
                       </p>
@@ -399,7 +399,9 @@
         }
       },
       tableClicked: function (index, state) {
+        // todo index to event
         var table
+        console.info(index)
         if (state === 'checked') {
           table = this.currentDatabase.tables.splice(index, 1)
           this.currentDatabase.append_table = this.currentDatabase.append_table.concat(table)
@@ -409,6 +411,7 @@
         }
       },
       tableEdit: function (index) {
+        // todo index to event
         this.currentTable = this.currentDatabase.append_table[index]
         if (!this.currentTable.hasOwnProperty('index_field')) {
           this.currentTable.index_field = {name: ''}
