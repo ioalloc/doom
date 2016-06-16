@@ -561,6 +561,9 @@
             this.classes.newInstanceInput['is-disabled'] = false
             this.newInstance.successTip = '连接成功'
             this.newInstance.database.value = response.data[0]
+            setTimeout(function () {
+              this.newInstance.successTip = ''
+            }.bind(this), 2000)
           }, function (response) {
             this.alert(response.data)
             this.classes.newInstanceConnect['is-loading'] = false

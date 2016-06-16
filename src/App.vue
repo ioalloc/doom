@@ -195,7 +195,7 @@
   }
 
   .main-page {
-    overflow-y: scroll;
+    overflow: hidden;
     padding-bottom: 60px;
   }
 
