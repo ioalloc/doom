@@ -469,8 +469,10 @@
         }
       },
       selectAll: function () {
-        for (var i in this.currentTable.fields) {
-          this.currentTable.select.push(this.currentTable.fields[i].name)
+        for (var field of this.currentTable.fields) {
+          if (this.currentTable.select.indexOf(field.name) === -1) {
+            this.currentTable.select.push(field.name)
+          }
         }
       },
       tableToggle: function (index) {

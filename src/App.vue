@@ -24,6 +24,7 @@
       <div class="nav-center">
         <a class="nav-item" href="#">
           bdp-sync
+          <p class="tag is-info">version: {{ version }}</p>
         </a>
         <a class="nav-item" href="#">
         </a>
@@ -41,6 +42,7 @@
           <a class="button is-danger" @click="shutdown">
             <span>关闭服务</span>
           </a>
+          <a class="button is-info is-outlined" disabled v-if="username">{{ username }}</a>
           <a class="button is-warning" href="#" @click="userOptClicked">
             <span>{{ userOpt }}</span>
           </a>
@@ -82,6 +84,8 @@
       return {
         userOpt: '登录',
         isLogin: true,
+        username: null,
+        version: '',
         classes: {
         },
         tabs: {
@@ -124,10 +128,18 @@
     ready: function () {
       this.$refs['configure'].loadConfigure('ready')
       this.currentTab = this.tabs.configure
+      this.appInfo()
     },
     methods: {
       initConfigure: function () {
         this.$refs['configure'].loadConfigure('init')
+        this.appInfo()
+      },
+      appInfo: function () {
+        this.$http.get('/api/info').then(function (response) {
+          this.username = response.data.username
+          this.version = response.data.version
+        })
       },
       switchTab: function (tab) {
         if (this.currentTab != null) {
