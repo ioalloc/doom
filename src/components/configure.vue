@@ -424,7 +424,7 @@
             }
           }
         } else if (state === 'unchecked') {
-          for (let i in database.tables) {
+          for (let i in database.append_table) {
             if (database.append_table[i].name === tbName) {
               table = database.append_table.splice(i, 1)
               database.tables = database.tables.concat(table)
